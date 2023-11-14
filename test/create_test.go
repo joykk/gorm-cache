@@ -3,7 +3,7 @@ package test
 import (
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/asjdf/gorm-cache/cache"
+	"github.com/joykk/gorm-cache/cache"
 	"gorm.io/gorm"
 )
 

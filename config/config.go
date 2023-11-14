@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/asjdf/gorm-cache/storage"
-	"github.com/asjdf/gorm-cache/util"
+	"github.com/joykk/gorm-cache/storage"
+	"github.com/joykk/gorm-cache/util"
 )
 
 type CacheConfig struct {
@@ -14,6 +14,8 @@ type CacheConfig struct {
 
 	// Tables only cache data within given data tables (cache all if empty)
 	Tables []string
+	// DisableTables 设置黑名单不缓存的表
+	DisableTables []string
 
 	// InvalidateWhenUpdate
 	// if user update/delete/create something in DB, we invalidate all cached data to ensure consistency,

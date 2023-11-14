@@ -1,4 +1,4 @@
-module github.com/asjdf/gorm-cache
+module github.com/joykk/gorm-cache
 
 go 1.18
 

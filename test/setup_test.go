@@ -1,17 +1,17 @@
 package test
 
 import (
-	"github.com/asjdf/gorm-cache/storage"
 	"github.com/bluele/gcache"
+	"github.com/joykk/gorm-cache/storage"
 	"os"
 	"testing"
 
 	"gorm.io/gorm/logger"
 
-	"github.com/asjdf/gorm-cache/cache"
+	"github.com/joykk/gorm-cache/cache"
 
-	"github.com/asjdf/gorm-cache/config"
 	"github.com/glebarez/sqlite"
+	"github.com/joykk/gorm-cache/config"
 	"gorm.io/gorm"
 )
 

@@ -1,12 +1,11 @@
 package cache
 
 import (
-	"github.com/asjdf/gorm-cache/config"
-	"github.com/asjdf/gorm-cache/util"
+	"github.com/joykk/gorm-cache/config"
 	"gorm.io/gorm"
 )
 
-func AfterCreate(cache *Gorm2Cache) func(db *gorm.DB) {
+func (c *Gorm2Cache) AfterCreate(cache *Gorm2Cache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
 		if db.RowsAffected == 0 {
 			return // no rows affected, no need to invalidate cache
@@ -20,7 +19,7 @@ func AfterCreate(cache *Gorm2Cache) func(db *gorm.DB) {
 		}
 		ctx := db.Statement.Context
 
-		if db.Error == nil && cache.Config.InvalidateWhenUpdate && util.ShouldCache(tableName, cache.Config.Tables) {
+		if db.Error == nil && cache.Config.InvalidateWhenUpdate && c.ShouldCache(db, tableName) {
 			if cache.Config.CacheLevel == config.CacheLevelAll || cache.Config.CacheLevel == config.CacheLevelOnlySearch {
 				invalidSearchCache := func() {
 					// We invalidate search cache here,

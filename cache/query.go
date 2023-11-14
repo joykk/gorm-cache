@@ -3,10 +3,10 @@ package cache
 import (
 	"errors"
 	"fmt"
-	"github.com/asjdf/gorm-cache/config"
-	"github.com/asjdf/gorm-cache/storage"
-	"github.com/asjdf/gorm-cache/util"
 	"github.com/hashicorp/go-multierror"
+	"github.com/joykk/gorm-cache/config"
+	"github.com/joykk/gorm-cache/storage"
+	"github.com/joykk/gorm-cache/util"
 	"gorm.io/gorm"
 	"gorm.io/gorm/callbacks"
 	"reflect"
@@ -56,7 +56,7 @@ func (h *queryHandler) BeforeQuery() func(db *gorm.DB) {
 		db.InstanceSet("gorm:cache:sql", sql)
 		db.InstanceSet("gorm:cache:vars", db.Statement.Vars)
 
-		if util.ShouldCache(tableName, cache.Config.Tables) {
+		if h.cache.ShouldCache(db, tableName) {
 			hit := false
 			defer func() {
 				if hit {
@@ -219,7 +219,7 @@ func (h *queryHandler) AfterQuery() func(db *gorm.DB) {
 			varObj, _ := db.InstanceGet("gorm:cache:vars")
 			vars := varObj.([]interface{})
 
-			if !util.ShouldCache(tableName, cache.Config.Tables) {
+			if !h.cache.ShouldCache(db, tableName) {
 				return
 			}
 

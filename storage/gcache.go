@@ -2,8 +2,8 @@ package storage
 
 import (
 	"context"
-	"github.com/asjdf/gorm-cache/util"
 	"github.com/bluele/gcache"
+	"github.com/joykk/gorm-cache/util"
 	"strings"
 	"sync"
 	"time"

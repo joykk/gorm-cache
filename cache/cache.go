@@ -2,9 +2,9 @@ package cache
 
 import (
 	"context"
-	"github.com/asjdf/gorm-cache/config"
-	"github.com/asjdf/gorm-cache/storage"
-	"github.com/asjdf/gorm-cache/util"
+	"github.com/joykk/gorm-cache/config"
+	"github.com/joykk/gorm-cache/storage"
+	"github.com/joykk/gorm-cache/util"
 	jsoniter "github.com/json-iterator/go"
 	"gorm.io/gorm"
 )
@@ -46,17 +46,17 @@ func (c *Gorm2Cache) Name() string {
 }
 
 func (c *Gorm2Cache) Initialize(db *gorm.DB) (err error) {
-	err = db.Callback().Create().After("gorm:create").Register("gorm:cache:after_create", AfterCreate(c))
+	err = db.Callback().Create().After("gorm:create").Register("gorm:cache:after_create", c.AfterCreate(c))
 	if err != nil {
 		return err
 	}
 
-	err = db.Callback().Delete().After("gorm:delete").Register("gorm:cache:after_delete", AfterDelete(c))
+	err = db.Callback().Delete().After("gorm:delete").Register("gorm:cache:after_delete", c.AfterDelete(c))
 	if err != nil {
 		return err
 	}
 
-	err = db.Callback().Update().After("gorm:update").Register("gorm:cache:after_update", AfterUpdate(c))
+	err = db.Callback().Update().After("gorm:update").Register("gorm:cache:after_update", c.AfterUpdate(c))
 	if err != nil {
 		return err
 	}
@@ -171,4 +171,38 @@ func (c *Gorm2Cache) BatchGetPrimaryCache(ctx context.Context, tableName string,
 		cacheKeys = append(cacheKeys, util.GenPrimaryCacheKey(c.InstanceId, tableName, primaryKey))
 	}
 	return c.cache.BatchGetValues(ctx, cacheKeys)
+}
+
+const InstanceCacheType = "InstanceCacheType"
+
+// UseCache 设置本次查询使用缓存
+func UseCache(db *gorm.DB) *gorm.DB {
+	return db.Set(InstanceCacheType, 1)
+}
+
+// DisableCache 设置本次查询不使用缓存
+func DisableCache(db *gorm.DB) *gorm.DB {
+	return db.Set(InstanceCacheType, -1)
+}
+
+func (c *Gorm2Cache) ShouldCache(db *gorm.DB, tableName string) bool {
+	if val, ok := db.Get(InstanceCacheType); ok {
+		valInt, ok2 := val.(int)
+		if ok2 {
+			if valInt >= 1 {
+				return true
+			}
+			if valInt <= -1 {
+				return false
+			}
+		}
+		// 其它cache走配置
+	}
+	if len(c.Config.Tables) == 0 {
+		return true
+	}
+	if util.ContainString(tableName, c.Config.DisableTables) {
+		return false
+	}
+	return util.ContainString(tableName, c.Config.Tables)
 }

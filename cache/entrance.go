@@ -3,7 +3,7 @@ package cache
 import (
 	"fmt"
 
-	"github.com/asjdf/gorm-cache/config"
+	"github.com/joykk/gorm-cache/config"
 )
 
 func NewGorm2Cache(cacheConfig *config.CacheConfig) (Cache, error) {

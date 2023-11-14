@@ -15,6 +15,15 @@ type Kv struct {
 	Value string
 }
 
+type GetGormCachePrefixFunc func() string
+
+// DefaultGetGormCachePrefixFunc 获取前缀名称
+var DefaultGetGormCachePrefixFunc = DefaultGormCachePrefix
+
+func DefaultGormCachePrefix() string {
+	return GormCachePrefix
+}
+
 const (
 	GormCachePrefix = "gormcache"
 )
