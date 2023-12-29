@@ -40,6 +40,9 @@ type CacheConfig struct {
 
 	// DebugLogger
 	DebugLogger util.LoggerInterface
+
+	// EnableSingleFlight if true, we will query first local memory cache
+	EnableSingleFlight bool
 }
 
 type CacheLevel int

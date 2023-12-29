@@ -67,41 +67,43 @@ func (h *queryHandler) BeforeQuery() func(db *gorm.DB) {
 			}()
 
 			// singleFlight Check
-			singleFlightKey := util.GenSingleFlightKey(tableName, sql, db.Statement.Vars...)
-			h.singleFlight.mu.Lock()
-			if h.singleFlight.m == nil {
-				h.singleFlight.m = make(map[string]*call)
-			}
-			if c, ok := h.singleFlight.m[singleFlightKey]; ok {
-				c.dups++
-				h.singleFlight.mu.Unlock()
-				c.wg.Wait()
+			if h.cache.Config.EnableSingleFlight {
+				singleFlightKey := util.GenSingleFlightKey(tableName, sql, db.Statement.Vars...)
+				h.singleFlight.mu.Lock()
+				if h.singleFlight.m == nil {
+					h.singleFlight.m = make(map[string]*call)
+				}
+				if c, ok := h.singleFlight.m[singleFlightKey]; ok {
+					c.dups++
+					h.singleFlight.mu.Unlock()
+					c.wg.Wait()
 
-				// 临时糊一个拷贝在这里 性能可能并不是那么好
-				d, err := json.Marshal(c.dest)
-				if err != nil {
-					_ = db.AddError(err)
+					// 临时糊一个拷贝在这里 性能可能并不是那么好
+					d, err := json.Marshal(c.dest)
+					if err != nil {
+						_ = db.AddError(err)
+						return
+					}
+					err = json.Unmarshal(d, db.Statement.Dest)
+					if err != nil {
+						_ = db.AddError(err)
+						return
+					}
+					hit = true
+					db.RowsAffected = c.rowsAffected
+					db.Error = multierror.Append(util.SingleFlightHit) // 为保证后续流程不走，必须设一个error
+					if c.err != nil {
+						db.Error = multierror.Append(db.Error, c.err)
+					}
+					h.cache.Logger.CtxInfo(ctx, "[BeforeQuery] single flight hit for key %v", singleFlightKey)
 					return
 				}
-				err = json.Unmarshal(d, db.Statement.Dest)
-				if err != nil {
-					_ = db.AddError(err)
-					return
-				}
-				hit = true
-				db.RowsAffected = c.rowsAffected
-				db.Error = multierror.Append(util.SingleFlightHit) // 为保证后续流程不走，必须设一个error
-				if c.err != nil {
-					db.Error = multierror.Append(db.Error, c.err)
-				}
-				h.cache.Logger.CtxInfo(ctx, "[BeforeQuery] single flight hit for key %v", singleFlightKey)
-				return
+				c := &call{key: singleFlightKey}
+				c.wg.Add(1)
+				h.singleFlight.m[singleFlightKey] = c
+				h.singleFlight.mu.Unlock()
+				db.InstanceSet("gorm:cache:query:single_flight_call", c)
 			}
-			c := &call{key: singleFlightKey}
-			c.wg.Add(1)
-			h.singleFlight.m[singleFlightKey] = c
-			h.singleFlight.mu.Unlock()
-			db.InstanceSet("gorm:cache:query:single_flight_call", c)
 
 			tryPrimaryCache := func() (hit bool) {
 				primaryKeys := getPrimaryKeysFromWhereClause(db)
