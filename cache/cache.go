@@ -176,15 +176,14 @@ func (c *Gorm2Cache) BatchGetPrimaryCache(ctx context.Context, tableName string,
 const InstanceCacheType = "InstanceCacheType"
 
 // UseCache
-// 设置本次查询使用缓存 单次逻辑有BUG，设置无效，当没有在Table里面配置但是临时启用缓存时，创建数据不会清理过期的缓存，会导致脏读。
+// Deprecated: 设置本次查询使用缓存 单次逻辑有BUG，设置无效，当没有在Table里面配置但是临时启用缓存时，创建数据不会清理过期的缓存，会导致脏读。
 func UseCache(db *gorm.DB) *gorm.DB {
 	//return db.Set(InstanceCacheType, 1)
 	return db
 }
 
 // DisableCache
-//
-//	设置本次查询不使用缓存 单次逻辑有BUG，设置无效，当Update是禁用cache时，Update不会清理过期的缓存，会导致脏读。
+// Deprecated: 设置本次查询不使用缓存 单次逻辑有BUG，设置无效，当Update是禁用cache时，Update不会清理过期的缓存，会导致脏读。
 func DisableCache(db *gorm.DB) *gorm.DB {
 	//return db.Set(InstanceCacheType, -1)
 	return db
