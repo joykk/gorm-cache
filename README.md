@@ -59,16 +59,11 @@ func main() {
 
 本库不支持Row操作的缓存。（WIP）
 
-## ctx使用，设置单次是否使用cache
+## ctx使用，设置单次不使用缓存
 ```go
 // "github.com/joykk/gorm-cache/cache"
 
 const InstanceCacheType = "InstanceCacheType"
-
-// UseCache 设置本次查询使用缓存
-func UseCache(db *gorm.DB) *gorm.DB {
-	return db.Set(InstanceCacheType, 1)
-}
 
 // DisableCache 设置本次查询不使用缓存
 func DisableCache(db *gorm.DB) *gorm.DB {
