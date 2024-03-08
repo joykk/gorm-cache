@@ -180,24 +180,24 @@ const InstanceCacheType = "InstanceCacheType"
 //	return db.Set(InstanceCacheType, 1)
 // }
 
-// DisableCache 设置本次查询不使用缓存
-func DisableCache(db *gorm.DB) *gorm.DB {
-	return db.Set(InstanceCacheType, -1)
-}
+//// DisableCache 设置本次查询不使用缓存
+//func DisableCache(db *gorm.DB) *gorm.DB {
+//	return db.Set(InstanceCacheType, -1)
+//}
 
-func (c *Gorm2Cache) ShouldCache(db *gorm.DB, tableName string) bool {
-	if val, ok := db.Get(InstanceCacheType); ok {
-		valInt, ok2 := val.(int)
-		if ok2 {
-			if valInt >= 1 {
-				return true
-			}
-			if valInt <= -1 {
-				return false
-			}
-		}
-		// 其它cache走配置
-	}
+func (c *Gorm2Cache) ShouldCache(_ *gorm.DB, tableName string) bool {
+	//if val, ok := db.Get(InstanceCacheType); ok {
+	//	valInt, ok2 := val.(int)
+	//	if ok2 {
+	//		if valInt >= 1 {
+	//			return true
+	//		}
+	//		if valInt <= -1 {
+	//			return false
+	//		}
+	//	}
+	//	// 其它cache走配置
+	//}
 	if len(c.Config.Tables) == 0 {
 		return true
 	}
